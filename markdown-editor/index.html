@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <link rel="stylesheet" href="./node_modules/simplemde/dist/simplemde.min.css">
+  <script src="./node_modules/simplemde/dist/simplemde.min.js"></script>
+  <style>
+    html, body {
+      height: 100%;
+      display: flex;
+      flex: 1;
+      flex-direction: column;
+    }
+    .CodeMirror {
+      flex: 1;
+    }
+  </style>
+</head>
+<body>
+  <textarea id="editor"></textarea>
+  <script>
+    var editor = new SimpleMDE({
+      element: document.getElementById('editor')
+    });
+
+    const { ipcRenderer } = require('electron');
+    ipcRenderer.on('editor-event', (event, arg) => {
+      console.log(arg);
+      event.sender.send('editor-reply', `Received ${arg}`);
+      if (arg === 'toggle-bold') {
+        editor.toggleBold();
+      } else if (arg === 'save') {
+        event.sender.send('save', editor.value());
+      }
+    });
+
+    ipcRenderer.send('editor-reply', 'Page Loaded');
+  </script>
+</body>
+</html>
